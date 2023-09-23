@@ -1,13 +1,17 @@
 import prisma from "@/lib/db/prisma";
-import FormSubmitButton from "../../components/FormSubmitButton";
-import { Metadata } from "next";
 import xlsx from "node-xlsx";
+import FormSubmitButton from "../../components/FormSubmitButton";
+import { ProcessedData } from "../../components/UploadExcel";
+import { Metadata } from "next";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { redirect } from "next/dist/server/api-utils";
 
 export const metadata: Metadata = {
   title: "Importar Gastos - Mi dinero",
 };
 
-async function upload(data: FormData) {
+async function upload(data: FormData): Promise<ProcessedData[]> {
   "use server";
 
   const file: File | null = data.get("file") as unknown as File;
@@ -18,28 +22,79 @@ async function upload(data: FormData) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  readExcel(buffer);
+  const processedData = await processBuffer(buffer);
 
-  return { success: true };
+  return processedData;
 }
 
-async function readExcel(params: Buffer) {
+async function processBuffer(params: Buffer): Promise<ProcessedData[]> {
+  "use server";
+
   const workSheetsFromFile = xlsx.parse(params);
   const sheet: any[][] = workSheetsFromFile[0].data;
 
   let i = 8;
-  const firstField = 1
+  const firstField = 1;
+  const processedRowList: ProcessedData[] = [];
+  dayjs.extend(customParseFormat);
+
   while (i < sheet.length) {
     const row: any[] = sheet[i].slice(firstField);
     const isEmptyRow = row.every(
       (cell) => cell === null || cell === undefined || cell === ""
     );
+
     if (isEmptyRow) {
       break;
     }
-    console.log(`Fila ${i + 1}: ${row.join(", ")}`);
+
+    const processedRow: ProcessedData = {
+      concept: row[0].trim(),
+      amount: -Number(row[2]),
+      date: formatExpenseDate(row[1]),
+      category: await setCategoryToRow(row[0]),
+    };
+
+    processedRowList.push(processedRow);
+
     i++;
   }
+
+  return processedRowList;
+}
+
+async function setCategoryToRow(rowConcept: string): Promise<string> {
+  "use server";
+  let category = "";
+
+  const conceptCategory = await prisma.conceptCategory.findFirst({
+    select: {
+      category: true,
+    },
+    where: {
+      concept: {
+        equals: rowConcept,
+      },
+    },
+  });
+
+  const defaultCategory = await prisma.category.findFirst({
+    select: {
+      name: true,
+    },
+  });
+
+  if (conceptCategory) {
+    category = conceptCategory.category;
+  } else if (defaultCategory) {
+    category = defaultCategory!.name;
+  }
+
+  return category;
+}
+
+function formatExpenseDate(date: string): string {
+  return dayjs(date, "DD/MM/YYYY", "es", true).format("YYYY-MM-DD");
 }
 
 function ImportExpensePage() {
