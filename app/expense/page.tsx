@@ -5,7 +5,7 @@ import Table, {
   TableHeaderItem,
   TableItems,
   TableProps,
-} from "../../components/Table/Table";
+} from "../components/Table/Table";
 
 const fetchExpenses = async (): Promise<Expense[]> => {
   const expenses = await prisma.expense.findMany();

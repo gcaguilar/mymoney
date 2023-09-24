@@ -8,31 +8,39 @@ datasource db {
 }
 
 model Expense {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  name   String
-  amount BigInt
-  date   String
-  type   String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  amount    BigInt
+  date      String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("expenses")
 }
 
 model Category {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("categories")
 }
+
 model conceptCategory {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  concept String
-  category String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  concept   String
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("conceptCategories")
+}
+
+model TemporalExpenses {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  expenseList Json[]
+
+  @@map("temporalExpense")
 }
