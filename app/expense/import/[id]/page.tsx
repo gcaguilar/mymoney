@@ -18,27 +18,70 @@ async function ImportedFile({ params }: { params: { id: string } }) {
 
   return (
     <>
-      <div>
-        <table>
+      <div className="overflow-x-auto">
+        <table className="table table-xs table-pin-rows table-pin-cols">
           <thead>
             <tr>
-              <th>Concept</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Category</th>
+              <th></th>
+              <td>Concept</td>
+              <td>Amount</td>
+              <td>Date</td>
+              <td>Category</td>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
               <tr key={index}>
-                <td>{item.concept}</td>
-                <td>{item.amount}</td>
-                <td>{item.date}</td>
-                <td>{item.type}</td>
+                <th>
+                  <label>
+                    <input type="checkbox" className="checkbox" />
+                  </label>
+                </th>
+                <td>
+                  <input
+                    className="input input-bordered w-full max-w-xs"
+                    required
+                    type="text"
+                    name="concept"
+                    defaultValue={item.concept}
+                  />
+                </td>
+                <td>
+                  <input
+                    className="input input-bordered w-full max-w-xs"
+                    required
+                    type="number"
+                    name="amount"
+                    defaultValue={item.amount}
+                  />
+                </td>
+                <td>
+                  <input
+                    className="input input-bordered w-full max-w-xs"
+                    required
+                    type="date"
+                    name="date"
+                    defaultValue={item.date}
+                  />
+                </td>
+                <td>
+                  <input
+                    className="input input-bordered w-full max-w-xs"
+                    required
+                    name="type"
+                    type="text"
+                    defaultValue={item.type}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+      <div>
+        <button className="btn btn-active">Guardar</button>
+        <button className="btn btn-accent">Eliminar</button>
       </div>
     </>
   );

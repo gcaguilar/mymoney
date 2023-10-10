@@ -44,7 +44,12 @@ export async function POST(req: Request, res: NextResponse) {
     })
     .then((data) => data.id);
 
-  const expenseUrl = new URL(`htpp://localhost:3000/expense/import/${pid}`, req.url);
+    console.log(pid)
+
+  const expenseUrl = new URL(
+    `http://localhost:3000/expense/import/${pid}`,
+    req.url
+  );
 
   return NextResponse.redirect(expenseUrl);
 }
