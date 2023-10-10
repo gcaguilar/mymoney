@@ -64,7 +64,7 @@ const Table: React.FC<TableProps> = ({ headers, items }) => {
                   .filter((key) => key.name !== "id")
                   .map(({ name: columnName }) => (
                     <>
-                      <ThTable name={columnName} />
+                      <ThTable name={columnName} key={columnName}/>
                     </>
                   ))}
             </tr>
