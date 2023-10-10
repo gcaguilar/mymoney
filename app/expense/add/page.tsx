@@ -55,13 +55,14 @@ export default async function AddExpensePage() {
           step="0.01"
           className="input-bordered input mb-3 w-full"
         />
-        <DateInput 
+        <DateInput
           name="requireDate"
-          className="input-bordered input mb-3 w-full"/>
+          className="input-bordered input mb-3 w-full"
+        />
         <SelectOption
           name="category"
-          className="select mb-3 w-full"
           options={categories}
+          propSelectedOption=""
         />
         <FormSubmitButton className="btn-block" type="submit">
           Añadir

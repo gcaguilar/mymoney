@@ -1,14 +1,17 @@
 import prisma from "@/lib/db/prisma";
-import { RequestParams } from "@prisma/client/runtime/library";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { useRouter } from "next/router";
+import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Params }
 ) {
-  const id = params.id;
+  const paramId = params.id;
 
-  if (!id) {
+  console.log(params)
+
+  if (!paramId) {
     return NextResponse.json(
       { error: 'El parámetro "id" es requerido' },
       { status: 400 }
@@ -18,14 +21,15 @@ export async function GET(
   const expense = await prisma.temporalExpenses
     .findFirst({
       where: {
-        id: id.toString(),
+        id: paramId.toString(),
       },
     })
+    .catch((error) => console.log(error))
     .then((data) => data?.expenseList);
 
-  if (!expense) {
-    return NextResponse.json({ status: 500 });
-  } else {
+  if (expense) {
     return NextResponse.json({ expense }, { status: 200 });
+  } else {
+    return NextResponse.json({ status: 500 });
   }
 }

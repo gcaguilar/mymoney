@@ -34,7 +34,7 @@ export async function POST(req: Request, res: NextResponse) {
     };
   });
 
-  const pid = await prisma.temporalExpenses
+  const expenseId = await prisma.temporalExpenses
     .create({
       data: {
         expenseList: {
@@ -44,14 +44,9 @@ export async function POST(req: Request, res: NextResponse) {
     })
     .then((data) => data.id);
 
-    console.log(pid)
+  const url = new URL(expenseId, req.url);
 
-  const expenseUrl = new URL(
-    `http://localhost:3000/expense/import/${pid}`,
-    req.url
-  );
-
-  return NextResponse.redirect(expenseUrl);
+  return NextResponse.redirect(url);
 }
 
 async function processBuffer(

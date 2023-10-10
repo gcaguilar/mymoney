@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ComponentProps, useState } from "react";
 
@@ -8,37 +8,39 @@ export interface OptionProps {
 }
 
 type SelectOptionProps = {
-  className?: string;
   options: OptionProps[];
   name: string;
-  propSelectedOption: string
+  propSelectedOption: string;
 } & ComponentProps<"select">;
 
 export default function SelectOption({
-  className,
   options,
   name,
   propSelectedOption,
   ...props
 }: SelectOptionProps) {
-  const [selectedOption, setSelectedOption] = useState<string>(propSelectedOption ? "" : propSelectedOption );
+  const [selectedOption, setSelectedOption] = useState<string>(
+    propSelectedOption ? "" : propSelectedOption
+  );
 
-  const Option = ({
-    value,
-    name,
-  }: OptionProps) => (
+  const Option = ({ value, name }: OptionProps) => (
     <option key={value} value={name}>
       {name}
     </option>
   );
+
+  if (selectedOption) {
+    setSelectedOption(propSelectedOption)
+  }
 
   return (
     <>
       <select
         key="select-element"
         name={name}
-        className={className}
+        className="select mb-3 w-full"
         value={selectedOption}
+        required
         onChange={(e) => {
           setSelectedOption(e.target.value);
         }}

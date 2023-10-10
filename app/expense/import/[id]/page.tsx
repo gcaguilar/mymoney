@@ -1,3 +1,6 @@
+import SelectOption, { OptionProps } from "../../../components/SelectOption";
+import prisma from "@/lib/db/prisma";
+
 interface Expense {
   concept: string;
   amount: number;
@@ -13,8 +16,19 @@ async function fetchData(id: string) {
   return expenseData;
 }
 
+async function fetchCategories(): Promise<OptionProps[]> {
+  const categories = await prisma.category.findMany({});
+  const mappedCategories = categories.map((key) => ({
+    value: key.id,
+    name: key.name,
+  }));
+
+  return mappedCategories;
+}
+
 async function ImportedFile({ params }: { params: { id: string } }) {
   const data = await fetchData(params.id);
+  const categories = await fetchCategories();
 
   return (
     <>
@@ -66,12 +80,11 @@ async function ImportedFile({ params }: { params: { id: string } }) {
                   />
                 </td>
                 <td>
-                  <input
-                    className="input input-bordered w-full max-w-xs"
-                    required
-                    name="type"
-                    type="text"
-                    defaultValue={item.type}
+                  <SelectOption
+                    name="category"
+                    className="select mb-3 w-full"
+                    propSelectedOption={item.type}
+                    options={categories}
                   />
                 </td>
               </tr>
