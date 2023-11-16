@@ -1,43 +1,37 @@
+"use server";
+
+import { Expense } from "./model";
+import { columns } from "./columns";
+import { DataTable } from "@/app/components/data-table";
 import React from "react";
-import prisma from "@/lib/db/prisma";
-import { Expense } from "@prisma/client";
-import Table, {
-  TableHeaderItem,
-  TableItems,
-  TableProps,
-} from "../components/Table/Table";
 
-const fetchExpenses = async (): Promise<Expense[]> => {
-  const expenses = await prisma.expense.findMany();
-  return expenses;
-};
+export interface Data {
+  data: Expense[];
+}
 
-const transformExprenses = async(): Promise<TableItems[]> => {
-  const expensesFromDb = await fetchExpenses();
-  const expenses: TableItems[] = expensesFromDb.map((expense) => ({
-    id: expense.id.toString(),
-    name: String(expense.name),
-    purchaseAmount: String(expense.amount.toString()),
-    purchaseDate: String(expense.date),
-    purchaseType: String(expense.type),
-  }));
-  return expenses;
-};
+async function fetchData(): Promise<Expense[]> {
+  return fetch("http://localhost:3000/api/expenses", {
+    method: "GET",
+  })
+    .then(async (res) => {
+      const r = await res.json()
+      console.log("Json", r);
+      return r;
+    })
+    .then((jsonRes: Data) => {
+      console.log("jsonRes", jsonRes.data)
+      return jsonRes.data;
+    });
+}
 
-const Expenses: React.FC<TableProps> = async () => {
-  const expensesData = await transformExprenses();
-
-  const header: TableHeaderItem[] = [
-    { name: "Nombre" },
-    { name: "Dinero" },
-    { name: "Fecha" },
-    { name: "Tipo" },
-  ];
-
+async function ExpensePage() {
+  const data = await fetchData();
+  console.log("Data: ", data);
   return (
     <>
-      <Table headers={header} items={expensesData} />
+      <DataTable columns={columns} data={data} />
     </>
   );
-};
-export default Expenses;
+}
+
+export default ExpensePage;

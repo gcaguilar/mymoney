@@ -1,7 +1,7 @@
 import xlsx from "node-xlsx";
 import dayjs from "dayjs";
-import prisma from "@/lib/db/prisma";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import prisma from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 
 export interface ProcessedData {
@@ -12,19 +12,26 @@ export interface ProcessedData {
 }
 
 export async function POST(req: Request, res: NextResponse) {
-  const file: File | null = (await req.formData()).get(
-    "file"
-  ) as unknown as File;
+  try {
+    const file: File | null = (await req.formData()).get("file") as unknown as File;
 
-  if (!file) {
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 400 }
-    );
+    if (!file) {
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    }
+
+    const fileArrayBuffer: ArrayBuffer = await file.arrayBuffer();
+    const importedData: ProcessedData[] = await processBuffer(fileArrayBuffer);
+    
+    const expenseId = await createTempExpenses(importedData);
+
+    return NextResponse.json({ redirect: `${expenseId}` });
+  } catch (error) {
+    console.error("Error:", error);
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
+}
 
-  const fileArrayBuffer: ArrayBuffer = await file.arrayBuffer();
-  const importedData: ProcessedData[] = await processBuffer(fileArrayBuffer);
+async function createTempExpenses(importedData: ProcessedData[]): Promise<string> {
   const jsonImportedData = importedData.map((object) => {
     return {
       concept: object.concept,
@@ -34,24 +41,16 @@ export async function POST(req: Request, res: NextResponse) {
     };
   });
 
-  const expenseId = await prisma.temporalExpenses
-    .create({
-      data: {
-        expenseList: {
-          set: jsonImportedData,
-        },
-      },
-    })
-    .then((data) => data.id);
+  const expense = await prisma.temporalExpenses.create({
+    data: {
+      expenseList: { set: jsonImportedData },
+    },
+  });
 
-  const url = new URL(expenseId, req.url);
-
-  return NextResponse.redirect(url);
+  return expense.id;
 }
 
-async function processBuffer(
-  arrayBuffer: ArrayBuffer
-): Promise<ProcessedData[]> {
+async function processBuffer(arrayBuffer: ArrayBuffer): Promise<ProcessedData[]> {
   const buffer = Buffer.from(arrayBuffer);
 
   const workSheetsFromFile = xlsx.parse(buffer);

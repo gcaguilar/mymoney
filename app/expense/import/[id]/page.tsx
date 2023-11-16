@@ -1,4 +1,4 @@
-import SelectOption, { OptionProps } from "../../../components/SelectOption";
+import SelectOption, { OptionProps } from "@/app/components/SelectOption";
 import prisma from "@/lib/db/prisma";
 
 interface Expense {
@@ -29,75 +29,40 @@ async function fetchCategories(): Promise<OptionProps[]> {
 async function ImportedFile({ params }: { params: { id: string } }) {
   const data = await fetchData(params.id);
   const categories = await fetchCategories();
+  return data.map((item, index) => (
+    <div key={index} className="card w-96 bg-neutral text-neutral-content">
+      <div className="card-body">
+        <input
+          className="input input-bordered w-full max-w-xs"
+          required
+          type="text"
+          name="concept"
+          defaultValue={item.concept}
+        />
+        <input
+          className="input input-bordered w-full max-w-xs"
+          required
+          type="number"
+          name="amount"
+          defaultValue={item.amount}
+        />
 
-  return (
-    <>
-      <div className="overflow-x-auto">
-        <table className="table table-xs table-pin-rows table-pin-cols">
-          <thead>
-            <tr>
-              <th></th>
-              <td>Concept</td>
-              <td>Amount</td>
-              <td>Date</td>
-              <td>Category</td>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, index) => (
-              <tr key={index}>
-                <th>
-                  <label>
-                    <input type="checkbox" className="checkbox" />
-                  </label>
-                </th>
-                <td>
-                  <input
-                    className="input input-bordered w-full max-w-xs"
-                    required
-                    type="text"
-                    name="concept"
-                    defaultValue={item.concept}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="input input-bordered w-full max-w-xs"
-                    required
-                    type="number"
-                    name="amount"
-                    defaultValue={item.amount}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="input input-bordered w-full max-w-xs"
-                    required
-                    type="date"
-                    name="date"
-                    defaultValue={item.date}
-                  />
-                </td>
-                <td>
-                  <SelectOption
-                    name="category"
-                    className="select mb-3 w-full"
-                    propSelectedOption={item.type}
-                    options={categories}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <input
+          className="input input-bordered w-full max-w-xs"
+          required
+          type="date"
+          name="date"
+          defaultValue={item.date}
+        />
+        <SelectOption
+          name="category"
+          className="select mb-3 w-full"
+          propSelectedOption={item.type}
+          options={categories}
+        />
       </div>
-      <div>
-        <button className="btn btn-active">Guardar</button>
-        <button className="btn btn-accent">Eliminar</button>
-      </div>
-    </>
-  );
+    </div>
+  ));
 }
 
 export default ImportedFile;

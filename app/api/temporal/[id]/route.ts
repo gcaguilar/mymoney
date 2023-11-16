@@ -1,6 +1,5 @@
 import prisma from "@/lib/db/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { useRouter } from "next/router";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 
 export async function GET(

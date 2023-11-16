@@ -1,73 +1,39 @@
-import prisma from "@/lib/db/prisma";
-import FormSubmitButton from "../../components/FormSubmitButton";
-import { Metadata } from "next";
-import DateInput from "../../components/DateInput";
-import SelectOption, { OptionProps } from "../../components/SelectOption";
-import { Expense } from "@prisma/client";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Añadir Gasto - Mi dinero",
-};
+import { fetcher } from "@/app/fetcher";
+import useSWR from "swr";
+import * as z from "zod";
+import ExpenseForm from "../ExpenseForm";
+import { formSchema } from "../Validations";
 
-async function fetchCategories(): Promise<OptionProps[]> {
-  "use server";
-
-  const categories = await prisma.category.findMany({});
-  const mappedCategories = categories.map((key) => ({
-    value: key.id,
-    name: key.name,
-  }));
-  return mappedCategories;
-}
-
-async function addExpense(formData: FormData) {
-  "use server";
-
-  const name = formData.get("title")?.toString();
-  const amount = Number(formData.get("amount")?.toString());
-  const date = formData.get("requireDate")?.toString();
-  const type = formData.get("category")?.toString();
-
-  if (!name || !amount || !date || !type) {
-    throw Error("Falta de rellenar algun campo");
+function AddExpensePage() {
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("YEAHHHHH")
+    console.log(values)
+    /* fetcher(
+      `api/expenses/add`,
+      "POST",
+      JSON.stringify({
+        name: values.title,
+        amount: values.amount,
+        date: values.date,
+        category: values.category.id,
+      })
+    )
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error)); */
   }
+  const {
+    data: categories,
+    error: categoriesError,
+    isLoading: isCategoriesLoading,
+  } = useSWR<CategoryResponse>(`api/categories`, fetcher<CategoryResponse>);
 
-  await prisma.expense.create({ data: { name, amount, date, type } });
+  if (categoriesError) return <div>Failed to load</div>;
+  if (isCategoriesLoading) return <div>Loading...</div>;
+  if (!categories || categories.data.length === 0) return null;
+
+  return <ExpenseForm categories={categories.data} onSubmit={onSubmit} />;
 }
 
-export default async function AddExpensePage() {
-  const categories = await fetchCategories();
-  return (
-    <div>
-      <h1 className="mb-3 text-lg font-bold">Nuevo gasto</h1>
-      <form action={addExpense}>
-        <input
-          required
-          name="title"
-          placeholder="Supermercado"
-          className="input-bordered input mb-3 w-full"
-        />
-        <input
-          required
-          name="amount"
-          placeholder="1.00€"
-          type="number"
-          step="0.01"
-          className="input-bordered input mb-3 w-full"
-        />
-        <DateInput
-          name="requireDate"
-          className="input-bordered input mb-3 w-full"
-        />
-        <SelectOption
-          name="category"
-          options={categories}
-          propSelectedOption=""
-        />
-        <FormSubmitButton className="btn-block" type="submit">
-          Añadir
-        </FormSubmitButton>
-      </form>
-    </div>
-  );
-}
+export default AddExpensePage;
