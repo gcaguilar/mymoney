@@ -8,23 +8,28 @@ import {
 } from "@/app/components/ui/select";
 import React from "react";
 
-type SelectFieldProps<T> = {
+type SelectFieldProps = {
   field: {
-    value: T;
-    onChange: ((value: string) => void);
+    value: string;
+    onChange: (value: string) => void;
   };
-  options: T[]
+  options: {
+    id: string;
+    name: string;
+  }[];
+  placeholder: string;
 };
 
-const FormSelectField = <T extends { id: string; name: string }>({
+const FormSelectField: React.FC<SelectFieldProps> = ({
   field,
-  options
-}: SelectFieldProps<T>) => (
+  options,
+  placeholder,
+}) => (
   <FormItem>
-    <Select onValueChange={(value) => field.onChange(value)} defaultValue={field.value.id}>
+    <Select onValueChange={field.onChange} defaultValue={field.value}>
       <FormControl>
         <SelectTrigger>
-          <SelectValue placeholder="Select a category" />
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
       </FormControl>
       <SelectContent>

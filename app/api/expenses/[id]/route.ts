@@ -1,6 +1,7 @@
 import prisma from "@/lib/db/prisma";
 import { Category } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { Data, ExpenseDTOUpdate } from "../../models";
 
 export interface Expense {
   id: string;
@@ -39,6 +40,45 @@ export async function GET(
 
     return NextResponse.json({ data: jsonExpense }, { status: 200 });
   } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const json: Data<ExpenseDTOUpdate> = await req.json();
+  const data = json.data;
+
+  if (
+    !params.id ||
+    !data.title ||
+    !data.amount ||
+    !data.date ||
+    !data.category
+  ) {
+    return NextResponse.json({ error: "Bad request" }, { status: 422 });
+  }
+  try {
+    await prisma.expense.update({
+      where: {
+        id: params.id,
+      },
+      data: {
+        name: data.title,
+        amount: Number(data.amount),
+        date: data.date,
+        type: data.category,
+      },
+    });
+
+    return NextResponse.json({ status: 204 });
+  } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -1,13 +1,20 @@
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+const HttpMethod = {
+  GET: "GET" as const,
+  POST: "POST" as const,
+  PUT: "PUT" as const,
+  DELETE: "DELETE" as const
+}
 
-export const fetcher = async <T>(
+type HttpMethod = typeof HttpMethod[keyof typeof HttpMethod];
+
+const fetcher = async <T>(
   url: string,
-  method: HttpMethod = "GET",
+  method: HttpMethod = HttpMethod.GET,
   body?: string
 ): Promise<T> => {
   const options: RequestInit = { method };
 
-  if (method === "POST" && body) {
+  if ((method !== HttpMethod.GET || HttpMethod.DELETE) && body) {
     options.body = body;
     options.headers = {
       "Content-Type": "application/json"
@@ -18,3 +25,8 @@ export const fetcher = async <T>(
     res.json()
   );
 };
+
+export {
+  HttpMethod,
+  fetcher
+}

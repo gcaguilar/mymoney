@@ -1,35 +1,26 @@
-"use server";
+"use client";
 
 import { Expense } from "./model";
 import { columns } from "./columns";
 import { DataTable } from "@/app/components/data-table";
 import React from "react";
+import useSWR from "swr";
+import { Data } from "../api/models";
+import { fetcher } from "../fetcher";
 
-export interface Data {
-  data: Expense[];
-}
+function ExpensePage() {
+  const { data, error, isLoading } = useSWR<Data<Expense[]>>(
+    `api/expenses`,
+    fetcher
+  );
 
-async function fetchData(): Promise<Expense[]> {
-  return fetch("http://localhost:3000/api/expenses", {
-    method: "GET",
-  })
-    .then(async (res) => {
-      const r = await res.json()
-      console.log("Json", r);
-      return r;
-    })
-    .then((jsonRes: Data) => {
-      console.log("jsonRes", jsonRes.data)
-      return jsonRes.data;
-    });
-}
+  if (error) return <div>Failed to load</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (!data) return null;
 
-async function ExpensePage() {
-  const data = await fetchData();
-  console.log("Data: ", data);
   return (
     <>
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={data.data} />
     </>
   );
 }

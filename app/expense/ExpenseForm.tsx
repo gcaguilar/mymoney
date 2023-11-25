@@ -35,13 +35,16 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       [ExpenseDate]: expenseProp?.date
         ? new Date(expenseProp!.date)
         : new Date(),
-      [Category]: expenseProp?.category || { id: "", name: "" },
+      [Category]: expenseProp?.category.id || "",
     },
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+      >
         <FormField
           control={form.control}
           name={Title}
@@ -74,9 +77,15 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         <FormField
           control={form.control}
           name={Category}
-          render={({ field }) => (
-            <FormSelectField options={categories} field={field} />
-          )}
+          render={({ field }) => {
+            return (
+              <FormSelectField
+                placeholder="Select a category"
+                options={categories}
+                field={field}
+              />
+            );
+          }}
         />
         <Button type="submit">Submit</Button>
       </form>

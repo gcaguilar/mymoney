@@ -2,39 +2,25 @@
 
 import {
   Form,
-  FormControl,
   FormField,
-  FormItem,
-  FormLabel,
 } from "@/app/components/ui/form";
-import { Input } from "@/app/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/app/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { HttpMethod, fetcher } from "@/app/fetcher";
+import FormInputField from "@/app/components/FormInputField";
 
 const formSchema = z.object({
   name: z.string().min(2),
 });
 
 function onSubmit(values: z.infer<typeof formSchema>) {
-  console.log("Values", values);
-  fetch("http://localhost:3000/api/categories", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify({
-      name: values.name,
-    }),
-  })
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  const data = { data: values };
+  const jsonData = JSON.stringify(data);
+  fetcher(`api/categories`, HttpMethod.POST, jsonData)
+    .then((response) => console.log(response))
+    .catch((error) => console.log(error));
 }
 
 export default function AddCategoryPage() {
@@ -53,12 +39,12 @@ export default function AddCategoryPage() {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoria</FormLabel>
-                <FormControl>
-                  <Input placeholder="Categoria" {...field} />
-                </FormControl>
-              </FormItem>
+              <FormInputField
+                title="Nombre"
+                placeholder="Gastos comunes"
+                field={field}
+                type="text"
+              />
             )}
           />
           <Button type="submit">Añadir</Button>

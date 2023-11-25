@@ -2,30 +2,24 @@ import prisma from "@/lib/db/prisma";
 import { Category } from "@prisma/client";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextResponse } from "next/server";
-
-export interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-  date: string;
-  category: string;
-}
+import { Data, ExpenseDTO } from "../models";
 
 export async function POST(req: Request, res: Response) {
   if (!req) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  const data: Expense = await req.json();
+  const json: Data<ExpenseDTO> = await req.json();
+  const data = json.data
 
-  if (!data.name || !data.amount || !data.date || !data.category) {
+  if (!data.title || !data.amount || !data.date || !data.category) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
   await prisma.expense.create({
     data: {
-      name: data.name,
-      amount: data.amount,
+      name: data.title,
+      amount: Number(data.amount),
       date: data.date,
       type: data.category,
     },
