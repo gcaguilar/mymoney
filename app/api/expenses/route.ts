@@ -1,8 +1,8 @@
 import prisma from "@/lib/db/prisma";
-import { Category } from "@prisma/client";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextResponse } from "next/server";
 import { Data, ExpenseDTO } from "../models";
+import { Category, Expense } from "@/app/models";
 
 export async function POST(req: Request, res: Response) {
   if (!req) {
@@ -10,7 +10,7 @@ export async function POST(req: Request, res: Response) {
   }
 
   const json: Data<ExpenseDTO> = await req.json();
-  const data = json.data
+  const data = json.data;
 
   if (!data.title || !data.amount || !data.date || !data.category) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
@@ -28,18 +28,9 @@ export async function POST(req: Request, res: Response) {
   return NextResponse.json({ status: 201 });
 }
 
-export async function GET({ params }: { params: Params }) {
+export async function GET() {
   try {
-    let expenses;
-    if (!params) {
-      expenses = await prisma.expense.findMany({});
-    } else {
-      expenses = await prisma.expense.findMany({
-        where: {
-          id: params.id,
-        },
-      });
-    }
+    const expenses = await prisma.expense.findMany({});
 
     if (!expenses || expenses.length === 0) {
       return NextResponse.json({ status: "No content" }, { status: 204 });
@@ -61,8 +52,6 @@ export async function GET({ params }: { params: Params }) {
         };
       })
     );
-
-    console.log("Response:", jsonExpense);
 
     return NextResponse.json({ data: jsonExpense }, { status: 200 });
   } catch (error) {
@@ -104,9 +93,9 @@ export async function PUT(req: Request, res: Response) {
 
     data: {
       name: data.name,
-      amount: data.amount,
+      amount: Number(data.amount),
       date: data.date,
-      type: data.category,
+      type: data.category.id,
     },
   });
 

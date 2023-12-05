@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Category, Expense } from "./model";
+import { Category, Expense } from "../models";
 
 export const columns: ColumnDef<Expense>[] = [
   {

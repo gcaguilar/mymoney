@@ -10,41 +10,42 @@ import FormSelectField from "@/app/components/FormSelectField";
 import { z } from "zod";
 import {
   Amount,
-  Category,
+  CategoryName,
   ExpenseDate,
   Title,
   formSchema,
-} from "./Validations";
+  getDefaultValues,
+} from "../Validations";
+import { Category, Expense } from "@/app/models";
 
 interface ExpenseFormProps {
-  expenseProp?: Expense;
+  expense?: Expense,
   categories: Category[];
   onSubmit: (values: z.infer<typeof formSchema>) => void;
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
-  expenseProp,
+  expense,
   categories,
   onSubmit,
 }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      [Title]: expenseProp?.name || "",
-      [Amount]: Number(expenseProp?.amount) || 0,
-      [ExpenseDate]: expenseProp?.date
-        ? new Date(expenseProp!.date)
-        : new Date(),
-      [Category]: expenseProp?.category.id || "",
-    },
+    defaultValues: getDefaultValues({
+      id: expense? expense.id : "",
+      name: expense ? expense.name : "",
+      amount: expense ? expense.amount : "",
+      date: expense ? expense.date : "",
+      category: {
+        id: expense ? expense.category.id : "",
+        name: expense ? expense.category.name : "",
+      },
+    }),
   });
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name={Title}
@@ -76,7 +77,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         />
         <FormField
           control={form.control}
-          name={Category}
+          name={CategoryName}
           render={({ field }) => {
             return (
               <FormSelectField

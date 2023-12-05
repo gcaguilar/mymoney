@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/app/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { HttpMethod, fetcher } from "@/app/fetcher";
 import FormInputField from "@/app/components/FormInputField";
 
 const formSchema = z.object({
@@ -18,7 +17,13 @@ const formSchema = z.object({
 function onSubmit(values: z.infer<typeof formSchema>) {
   const data = { data: values };
   const jsonData = JSON.stringify(data);
-  fetcher(`api/categories`, HttpMethod.POST, jsonData)
+  fetch(`api/categories`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: jsonData
+  })
     .then((response) => console.log(response))
     .catch((error) => console.log(error));
 }
