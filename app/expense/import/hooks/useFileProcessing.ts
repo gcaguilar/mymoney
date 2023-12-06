@@ -1,11 +1,15 @@
 import xlsx from "node-xlsx";
 import { parse, format } from "date-fns";
 import { useCategories } from "@/app/hooks";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Category, Expense } from "@/app/models";
+import { v4 as uuidv4 } from "uuid";
+
+const PAGE_SIZE = 10;
 
 const useFileProcessing = () => {
-  const [processedData, setProcessedData] = useState<Expense[]>();
+  const [processedData, setProcessedData] = useState<Expense[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const { data: categories } = useCategories();
 
   const processFiles = async (files: File[]) => {
@@ -72,7 +76,41 @@ const useFileProcessing = () => {
     return expense;
   };
 
-  return { processedData, processFiles };
+  const paginatedData = useMemo(() => {
+    const startIdx = (currentPage - 1) * PAGE_SIZE;
+    const endIdx = currentPage * PAGE_SIZE;
+    return processedData.slice(startIdx, endIdx);
+  }, [processedData, currentPage]);
+
+  const totalPages = Math.ceil(processedData.length / PAGE_SIZE);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const onRemoveItem = (id: string) => {
+    console.log(id)
+    const newData = processedData.filter(item => item.id !== id);
+    setProcessedData(newData);
+  };
+
+  return {
+    processFiles,
+    paginatedData,
+    currentPage,
+    nextPage,
+    prevPage,
+    totalPages,
+    onRemoveItem
+  };
 };
 
 export default useFileProcessing;

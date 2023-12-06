@@ -18,24 +18,27 @@ import {
   formListSchema,
   formSchema,
 } from "../../Validations";
+import { v4 as uuidv4 } from "uuid";
 
 interface CardFormProps {
   expenses: Expense[];
   categories: Category[];
   onSubmit: (values: z.infer<typeof formListSchema>) => void;
+  onRemove: (id: string) => void;
 }
 
 const CardForm: React.FC<CardFormProps> = ({
   expenses,
   categories,
   onSubmit,
+  onRemove,
 }) => {
-  const values = expenses.map((expense, index) => ({
+  const values = expenses.map((expense) => ({
     [Title]: expense.name,
     [Amount]: Number(expense.amount),
     [ExpenseDate]: new Date(expense.date),
     [CategoryName]: expense.category.id,
-    [Id]: Math.random().toString(),
+    [Id]: uuidv4(),
   }));
 
   const form = useForm<z.infer<typeof formListSchema>>({
@@ -44,8 +47,6 @@ const CardForm: React.FC<CardFormProps> = ({
       fields: values,
     },
   });
-
-  console.log(form.getValues());
 
   return (
     <div className="flex flex-col space-y-4 w-full">
@@ -56,7 +57,7 @@ const CardForm: React.FC<CardFormProps> = ({
         >
           {expenses.map((value, index) => (
             <React.Fragment key={`${index}.${value.id}`}>
-              <Card key={Math.random().toString()} className="w-full">
+              <Card className="w-full">
                 <CardContent>
                   <div className="flex flex-col space-y-1">
                     <FormField
@@ -109,7 +110,12 @@ const CardForm: React.FC<CardFormProps> = ({
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end">
-                  <Button variant="destructive">Remove</Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => onRemove(expenses[index][Id])}
+                  >
+                    Remove
+                  </Button>
                 </CardFooter>
               </Card>
             </React.Fragment>
