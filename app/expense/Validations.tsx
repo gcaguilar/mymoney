@@ -23,15 +23,17 @@ const getDefaultValues = ({
   category,
 }: Expense): Record<string, any> => {
   return {
-    Id: id || "",
-    Title: name || "",
-    Amount: Number(amount) || 0,
-    ExpenseDate: date ? new Date(date) : new Date(),
-    CategoryName: category?.id || "",
+    [Id]: id || "",
+    [Title]: name || "",
+    [Amount]: Number(amount) || 0,
+    [ExpenseDate]: date ? new Date(date) : new Date(),
+    [CategoryName]: category?.id || "",
   };
 };
 
-const formListSchema = z.array(formSchema);
+const formListSchema = z.object({
+  fields: z.array(formSchema)
+})
 
 export {
   Id,
