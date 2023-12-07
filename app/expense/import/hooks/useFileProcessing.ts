@@ -1,16 +1,16 @@
 import xlsx from "node-xlsx";
 import { parse, format } from "date-fns";
-import { useCategories } from "@/app/hooks";
 import { useMemo, useState } from "react";
 import { Category, Expense } from "@/app/models";
 import { v4 as uuidv4 } from "uuid";
+import useCategoryProcessing from "./useCategoryProcessing";
 
 const PAGE_SIZE = 10;
 
 const useFileProcessing = () => {
   const [processedData, setProcessedData] = useState<Expense[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { data: categories } = useCategories();
+  const { processCategory } = useCategoryProcessing();
 
   const processFiles = async (files: File[]) => {
     const processedRowList: Expense[] = [];
@@ -32,7 +32,7 @@ const useFileProcessing = () => {
           );
 
           if (!isEmptyRow) {
-            const processedRow = proccessRow(row, categories!.data);
+            const processedRow = proccessRow(row);
             processedRowList.push(processedRow);
           } else {
             foundEmptyRow = true;
@@ -45,34 +45,15 @@ const useFileProcessing = () => {
     setProcessedData(processedRowList);
   };
 
-  const processCategory = (
-    category: string,
-    categories: Category[]
-  ): Category => {
-    const words = category.split(/\s/g);
-    let defaultCategory = { id: "", name: "" };
-    for (const word of words) {
-      const tempCategory = categories.find((cat) => cat.name === word);
-      if (tempCategory) {
-        defaultCategory = tempCategory;
-      } else {
-        defaultCategory;
-      }
-    }
-
-    return defaultCategory;
-  };
-
-  const proccessRow = (row: any, category: Category[]): Expense => {
+  const proccessRow = (row: any): Expense => {
     const date = parse(row[2], "dd/MM/yyyy", new Date());
     const expense: Expense = {
       id: uuidv4(),
       name: row[1].trim(),
       amount: row[3],
       date: format(date, "yyyy-MM-dd"),
-      category: processCategory(row[1], category),
+      category: processCategory(row[1]),
     };
-
     return expense;
   };
 
