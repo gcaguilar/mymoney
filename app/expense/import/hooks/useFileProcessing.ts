@@ -66,7 +66,7 @@ const useFileProcessing = () => {
   const proccessRow = (row: any, category: Category[]): Expense => {
     const date = parse(row[2], "dd/MM/yyyy", new Date());
     const expense: Expense = {
-      id: "",
+      id: uuidv4(),
       name: row[1].trim(),
       amount: row[3],
       date: format(date, "yyyy-MM-dd"),
@@ -97,8 +97,7 @@ const useFileProcessing = () => {
   };
 
   const onRemoveItem = (id: string) => {
-    console.log(id)
-    const newData = processedData.filter(item => item.id !== id);
+    const newData = processedData.filter((item) => item.id !== id);
     setProcessedData(newData);
   };
 
@@ -109,7 +108,7 @@ const useFileProcessing = () => {
     nextPage,
     prevPage,
     totalPages,
-    onRemoveItem
+    onRemoveItem,
   };
 };
 
