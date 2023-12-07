@@ -22,25 +22,9 @@ model Expense {
 model Category {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
+  associatedNames String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("categories")
-}
-
-model conceptCategory {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  concept   String
-  category  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("conceptCategories")
-}
-
-model TemporalExpenses {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  expenseList Json[]
-
-  @@map("temporalExpense")
 }
