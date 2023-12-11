@@ -1,16 +1,16 @@
 import xlsx from "node-xlsx";
 import { parse, format } from "date-fns";
 import { useMemo, useState } from "react";
-import { Category, Expense } from "@/app/models";
-import { v4 as uuidv4 } from "uuid";
-import useCategoryProcessing from "./useCategoryProcessing";
+import { Expense } from "@/app/models";
+import useRowProcessing from "./useRowProcessing";
+import exp from "constants";
 
 const PAGE_SIZE = 10;
 
 const useFileProcessing = () => {
   const [processedData, setProcessedData] = useState<Expense[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { processCategory } = useCategoryProcessing();
+  const { processRow } = useRowProcessing();
 
   const processFiles = async (files: File[]) => {
     const processedRowList: Expense[] = [];
@@ -32,7 +32,7 @@ const useFileProcessing = () => {
           );
 
           if (!isEmptyRow) {
-            const processedRow = proccessRow(row);
+            const processedRow = processRow(row);
             processedRowList.push(processedRow);
           } else {
             foundEmptyRow = true;
@@ -43,18 +43,6 @@ const useFileProcessing = () => {
     }
 
     setProcessedData(processedRowList);
-  };
-
-  const proccessRow = (row: any): Expense => {
-    const date = parse(row[2], "dd/MM/yyyy", new Date());
-    const expense: Expense = {
-      id: uuidv4(),
-      name: row[1].trim(),
-      amount: row[3],
-      date: format(date, "yyyy-MM-dd"),
-      category: processCategory(row[1]),
-    };
-    return expense;
   };
 
   const paginatedData = useMemo(() => {
@@ -82,6 +70,27 @@ const useFileProcessing = () => {
     setProcessedData(newData);
   };
 
+  const onUpdateItem = (expense: Expense) => {
+    const index = processedData.findIndex((item) => item.id === expense.id);
+    if (index !== -1) {
+      const newData = [...processedData];
+      newData[index] = expense;
+      setProcessedData(newData);
+    }
+  };
+
+  const submitFile = () => {
+    const data = { data: processedData };
+    const jsonData = JSON.stringify(data);
+    fetch(`${process.env.PATH_URL_BACKEND}/expenses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonData,
+    });
+  };
+
   return {
     processFiles,
     paginatedData,
@@ -90,6 +99,8 @@ const useFileProcessing = () => {
     prevPage,
     totalPages,
     onRemoveItem,
+    onUpdateItem,
+    submitFile,
   };
 };
 
