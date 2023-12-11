@@ -1,28 +1,30 @@
 "use client";
 
-import {
-  Form,
-  FormField,
-} from "@/app/components/ui/form";
+import { Form, FormField } from "@/app/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/app/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import FormInputField from "@/app/components/FormInputField";
+import { Textarea } from "@/app/components/ui/textarea";
 
 const formSchema = z.object({
   name: z.string().min(2),
+  associatesNames: z
+    .string()
+    .transform((val) => val.split(",").map((item) => item.trim()))
+    .optional(),
 });
 
 function onSubmit(values: z.infer<typeof formSchema>) {
   const data = { data: values };
   const jsonData = JSON.stringify(data);
-  fetch(`api/categories`, {
+  fetch(`${process.env.PATH_URL_BACKEND}categories`, {
     method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    body: jsonData
+    body: jsonData,
   })
     .then((response) => console.log(response))
     .catch((error) => console.log(error));
@@ -33,6 +35,7 @@ export default function AddCategoryPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      associatesNames: [],
     },
   });
 
@@ -51,6 +54,10 @@ export default function AddCategoryPage() {
                 type="text"
               />
             )}
+          />
+          <Textarea
+            placeholder="Delivery, Bizum, Supermercado..."
+            {...form.register("associatesNames")}
           />
           <Button type="submit">Añadir</Button>
         </form>
