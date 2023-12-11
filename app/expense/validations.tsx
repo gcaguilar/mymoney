@@ -8,11 +8,11 @@ const ExpenseDate = "date";
 const CategoryName = "category";
 
 const formSchema = z.object({
-  [Id]: z.string().optional(),
+  [Id]: z.string(),
   [Title]: z.string().min(2),
   [Amount]: z.coerce.number(),
   [ExpenseDate]: z.date(),
-  [CategoryName]: z.string(),
+  [CategoryName]: z.string().refine((value) => value !== ""),
 });
 
 const getDefaultValues = ({
