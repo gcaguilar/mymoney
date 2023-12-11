@@ -1,4 +1,9 @@
-import { FormItem, FormControl, FormLabel } from "@/app/components/ui/form";
+import {
+  FormItem,
+  FormControl,
+  FormLabel,
+  FormMessage,
+} from "@/app/components/ui/form";
 import { Input } from "@/app/components/ui/input";
 import React from "react";
 
@@ -10,6 +15,7 @@ type InputFieldProps = {
   };
   placeholder: string;
   type: string;
+  onFieldChange?: (value: string) => void;
 };
 
 const FormInputField: React.FC<InputFieldProps> = ({
@@ -17,18 +23,30 @@ const FormInputField: React.FC<InputFieldProps> = ({
   field,
   placeholder,
   type,
-}) => (
-  <FormItem>
-    {title ? <FormLabel>{title}</FormLabel> : null}
-    <FormControl>
-      <Input
-        type={type}
-        placeholder={placeholder}
-        value={field.value}
-        onChange={field.onChange}
-      />
-    </FormControl>
-  </FormItem>
-);
+  onFieldChange,
+}) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    field.onChange(e);
+
+    if (onFieldChange) {
+      onFieldChange(e.target.value);
+    }
+  };
+
+  return (
+    <FormItem>
+      {title ? <FormLabel>{title}</FormLabel> : null}
+      <FormControl>
+        <Input
+          type={type}
+          placeholder={placeholder}
+          value={field.value}
+          onChange={handleInputChange}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  );
+};
 
 export default FormInputField;
