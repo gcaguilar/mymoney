@@ -1,28 +1,31 @@
 import prisma from "@/lib/db/prisma";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextResponse } from "next/server";
-import { Data, ExpenseDTO } from "../models";
 import { Category, Expense } from "@/app/models";
+import { Prisma, PrismaClient } from "@prisma/client";
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
   if (!req) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  const json: Data<ExpenseDTO> = await req.json();
-  const data = json.data;
+  const json: { data: Expense | Expense[] } = await req.json();
+  let expenses: Expense[] = Array.isArray(json.data) ? json.data : [json.data];
 
-  if (!data.title || !data.amount || !data.date || !data.category) {
+  if (
+    !expenses.every(
+      (expense) =>
+        expense.name && expense.amount && expense.date && expense.category
+    )
+  ) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
-  await prisma.expense.create({
-    data: {
-      name: data.title,
-      amount: Number(data.amount),
-      date: data.date,
-      type: data.category,
-    },
+  await prisma.expense.createMany({
+    data: expenses.map(({ id, ...value }) => ({
+      ...value,
+      amount: BigInt(Math.floor(parseFloat(value.amount))),
+      category: value.category.id,
+    })),
   });
 
   return NextResponse.json({ status: 201 });
@@ -38,7 +41,7 @@ export async function GET() {
 
     const jsonExpense = await Promise.all(
       expenses.map(async (expense) => {
-        const category = await findCategoryByName(expense.type);
+        const category = await findCategoryByName(expense.category);
 
         return {
           id: expense.id,
@@ -95,7 +98,7 @@ export async function PUT(req: Request, res: Response) {
       name: data.name,
       amount: Number(data.amount),
       date: data.date,
-      type: data.category.id,
+      category: data.category.id,
     },
   });
 
@@ -107,15 +110,15 @@ export async function DELETE(req: Request, res: Response) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  const data: Expense = await req.json();
-
-  if (!data.id) {
-    return NextResponse.json({ error: "Bad request" }, { status: 204 });
+  const data = await req.json();
+  console.log(data)
+  if (!data.data.id) {
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
   await prisma.expense.delete({
     where: {
-      id: data.id,
+      id: data.data.id,
     },
   });
 
