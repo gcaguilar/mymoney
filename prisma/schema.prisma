@@ -12,7 +12,7 @@ model Expense {
   name      String
   amount    BigInt
   date      String
-  type      String
+  category      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -20,11 +20,19 @@ model Expense {
 }
 
 model Category {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  associatedNames String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  associatesNames String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("categories")
+}
+
+model Keywords {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  updatedAt DateTime @updatedAt
+
+  @@map("keywords")
 }
