@@ -1,32 +1,17 @@
 import useSWR from "swr";
 import { Expense, Category } from "./models";
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+export const fetcher = (url: string) =>
+  fetch(`${process.env.PATH_URL_BACKEND}${url}`).then((res) => res.json());
 
-interface CategoryResponse {
-  data: Category[];
+interface Response<T> {
+  data: T;
 }
 
-interface ExpensesResponse {
-  data: Expense[];
-}
+const useCategories = () => useSWR<Response<Category[]>>(`categories`, fetcher);
 
-interface ExpenseResponse {
-  data: Expense;
-}
-
-const useCategories = () =>
-  useSWR<CategoryResponse>(
-    `${process.env.PATH_URL_BACKEND}/categories`,
-    fetcher
-  );
-
-const useExpenses = () =>
-  useSWR<ExpensesResponse>(`${process.env.PATH_URL_BACKEND}/expenses`, fetcher);
+const useExpenses = () => useSWR<Response<Expense[]>>(`expenses`, fetcher);
 
 const useExpense = (id: string) =>
-  useSWR<ExpenseResponse>(
-    `${process.env.PATH_URL_BACKEND}/expenses/${id}`,
-    fetcher
-  );
+  useSWR<Response<Expense>>(`expenses/${id}`, fetcher);
 
 export { useCategories, useExpenses, useExpense };

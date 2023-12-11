@@ -1,6 +1,7 @@
 export interface Category {
   id: string;
   name: string;
+  associatesNames: string[];
 }
 
 export interface Expense {
@@ -8,12 +9,12 @@ export interface Expense {
   name: string;
   amount: string;
   date: string;
-  category: Category
+  category: Category;
 }
 
 export interface ImportedExpense {
   name: string;
   amount: number;
-  date: string,
+  date: string;
   category: Category | null;
 }
