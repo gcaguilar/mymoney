@@ -11,6 +11,7 @@ export async function GET() {
   const mappedData = data.map((category) => ({
     id: category.id,
     name: category.name,
+    associatesNames: category.associatesNames
   }));
 
   return NextResponse.json({ data: mappedData }, { status: 200 });
@@ -21,15 +22,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  const data = await req.json();
+  const json = await req.json();
+  const data = json.data
 
-  if (!data.name) {
+  if (!data) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
   await prisma.category.create({
     data: {
       name: data.name,
+      associatesNames: data.associatesNames
     },
   });
 
@@ -53,6 +56,7 @@ export async function PUT(req: Request) {
     },
     data: {
       name: data.name,
+      associatesNames: data.associatesNames
     },
   });
 
