@@ -6,7 +6,7 @@ import { useCategories } from "@/app/hooks";
 import FileForm from "@/app/expense/import/components/FileForm";
 import CardForm from "@/app/expense/import/components/CardForm";
 import { z } from "zod";
-import { formListSchema } from "@/app/expense/Validations";
+import { formListSchema } from "@/app/expense/validations";
 import { Button } from "@/app/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,6 +20,8 @@ const FileUploadForm = () => {
     prevPage,
     totalPages,
     onRemoveItem,
+    onUpdateItem,
+    submitFile
   } = useFileProcessing();
 
   const onSubmit: SubmitHandler<{ inputFiles: File[] }> = async (formData: {
@@ -28,7 +30,9 @@ const FileUploadForm = () => {
     processFiles(formData.inputFiles);
   };
 
-  const onSubmitForm = (values: z.infer<typeof formListSchema>) => ({});
+  const onSubmitForm = (values: z.infer<typeof formListSchema>) => {
+    submitFile();
+  };
 
   if (error) return <div>Failed to load</div>;
   if (isLoading) return <div>Loading...</div>;
@@ -56,6 +60,7 @@ const FileUploadForm = () => {
           categories={data.data}
           onSubmit={onSubmitForm}
           onRemove={onRemoveItem}
+          onUpdateItem={onUpdateItem}
         />
       </div>
     );

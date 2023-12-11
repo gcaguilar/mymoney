@@ -1,9 +1,11 @@
 import FormDateField from "@/app/components/FormDateField";
-import FormInputField from "@/app/components/FormInputField";
-import FormSelectField from "@/app/components/FormSelectField";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
-import { Form, FormField, FormItem, FormLabel } from "@/app/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+} from "@/app/components/ui/form";
 import { Category, Expense } from "@/app/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
@@ -16,15 +18,17 @@ import {
   Id,
   Title,
   formListSchema,
-  formSchema,
-} from "../../Validations";
+} from "../../validations";
 import { v4 as uuidv4 } from "uuid";
+import FormInputField from "@/app/components/FormInputField";
+import FormCombox from "@/app/components/FormCombox";
 
 interface CardFormProps {
   expenses: Expense[];
   categories: Category[];
   onSubmit: (values: z.infer<typeof formListSchema>) => void;
   onRemove: (id: string) => void;
+  onUpdateItem: (expense: Expense) => void;
 }
 
 const CardForm: React.FC<CardFormProps> = ({
@@ -32,6 +36,7 @@ const CardForm: React.FC<CardFormProps> = ({
   categories,
   onSubmit,
   onRemove,
+  onUpdateItem,
 }) => {
   const values = expenses.map((expense) => ({
     [Title]: expense.name,
@@ -42,11 +47,15 @@ const CardForm: React.FC<CardFormProps> = ({
   }));
 
   const form = useForm<z.infer<typeof formListSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formListSchema),
     defaultValues: {
       fields: values,
     },
   });
+
+  const sortedOptions = categories
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="flex flex-col space-y-4 w-full">
@@ -67,6 +76,10 @@ const CardForm: React.FC<CardFormProps> = ({
                         <FormInputField
                           title="Titulo"
                           type="text"
+                          onFieldChange={(name) => {
+                            const newData = { ...value, name: name as string };
+                            onUpdateItem(newData);
+                          }}
                           field={field}
                           placeholder=""
                         />
@@ -79,6 +92,13 @@ const CardForm: React.FC<CardFormProps> = ({
                         <FormInputField
                           title="Cantidad"
                           type="number"
+                          onFieldChange={(number) => {
+                            const newData = {
+                              ...value,
+                              amount: number as string,
+                            };
+                            onUpdateItem(newData);
+                          }}
                           field={field}
                           placeholder=""
                         />
@@ -88,19 +108,38 @@ const CardForm: React.FC<CardFormProps> = ({
                       control={form.control}
                       name={`fields.${index}.${ExpenseDate}`}
                       render={({ field }) => (
-                        <FormDateField title="Fecha" field={field} />
+                        <FormDateField
+                          title="Fecha"
+                          onFieldChange={(date) => {
+                            const newData = {
+                              ...value,
+                              date: date!.toISOString(),
+                            };
+                            onUpdateItem(newData);
+                          }}
+                          field={field}
+                        />
                       )}
                     />
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
                       <FormField
                         control={form.control}
                         name={`fields.${index}.${CategoryName}`}
                         render={({ field }) => {
                           return (
-                            <FormSelectField
-                              placeholder="Select a category"
-                              options={categories}
+                            <FormCombox
+                              onFieldChange={(id, name) => {
+                                const newData = {
+                                  ...value,
+                                  category: {
+                                    id: id,
+                                    name: name,
+                                    associatesNames: [],
+                                  },
+                                };
+                                onUpdateItem(newData);
+                              }}
+                              options={sortedOptions}
                               field={field}
                             />
                           );
