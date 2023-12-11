@@ -2,7 +2,7 @@
 
 import * as z from "zod";
 import ExpenseForm from "@/app/expense/components/ExpenseForm";
-import { formSchema } from "../Validations";
+import { formSchema } from "../validations";
 import { useCategories, useExpense } from "@/app/hooks";
 
 function EditExpensePage({ params }: { params: { id: string } }) {
@@ -20,7 +20,7 @@ function EditExpensePage({ params }: { params: { id: string } }) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const data = { data: values };
     const jsonData = JSON.stringify(data);
-    fetch(`api/expenses/${params.id}`, {
+    fetch(`${process.env.PATH_URL_BACKEND}expenses/${params.id}`, {
       method: "PUT",
       body: jsonData,
     })

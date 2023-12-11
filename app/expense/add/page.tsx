@@ -2,14 +2,14 @@
 
 import * as z from "zod";
 import ExpenseForm from "@/app/expense/components/ExpenseForm";
-import { formSchema } from "@/app/expense/Validations";
+import { formSchema } from "@/app/expense/validations";
 import { useCategories } from "@/app/hooks";
 
 function AddExpensePage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const data = { data: values };
     const jsonData = JSON.stringify(data);
-    fetch(`api/expenses`, {
+    fetch(`${process.env.PATH_URL_BACKEND}expenses`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

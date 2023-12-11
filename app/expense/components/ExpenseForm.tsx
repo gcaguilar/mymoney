@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import FormInputField from "@/app/components/FormInputField";
 import FormDateField from "@/app/components/FormDateField";
-import FormSelectField from "@/app/components/FormSelectField";
 import { z } from "zod";
 import {
   Amount,
@@ -15,8 +14,9 @@ import {
   Title,
   formSchema,
   getDefaultValues,
-} from "../Validations";
+} from "../validations";
 import { Category, Expense } from "@/app/models";
+import FormCombox from "@/app/components/FormCombox";
 
 interface ExpenseFormProps {
   expense?: Expense,
@@ -39,9 +39,15 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       category: {
         id: expense ? expense.category.id : "",
         name: expense ? expense.category.name : "",
+        associatesNames: []
       },
     }),
   });
+
+  const sortedOptions = categories
+  .slice()
+  .sort((a, b) => a.name.localeCompare(b.name));
+
 
   return (
     <Form {...form}>
@@ -80,11 +86,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           name={CategoryName}
           render={({ field }) => {
             return (
-              <FormSelectField
-                placeholder="Select a category"
-                options={categories}
-                field={field}
-              />
+              <FormCombox
+              options={sortedOptions}
+              field={field}
+            />
             );
           }}
         />
