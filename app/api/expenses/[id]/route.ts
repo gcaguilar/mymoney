@@ -25,7 +25,7 @@ export async function GET(
       return NextResponse.json({ status: "No content" }, { status: 204 });
     }
 
-    const category = await findCategoryByName(expense.type);
+    const category = await findCategoryByName(expense.category);
 
     const jsonExpense = {
       id: expense.id,
@@ -56,7 +56,7 @@ export async function PUT(
 
   if (
     !params.id ||
-    !data.title ||
+    !data.name ||
     !data.amount ||
     !data.date ||
     !data.category
@@ -69,10 +69,10 @@ export async function PUT(
         id: params.id,
       },
       data: {
-        name: data.title,
+        name: data.name,
         amount: Number(data.amount),
         date: data.date,
-        type: data.category,
+        category: data.category,
       },
     });
 
