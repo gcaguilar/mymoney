@@ -1,7 +1,7 @@
-import prisma from "@/lib/db/prisma";
+import ExpenseModel from "@/lib/db/models/ExpenseSchema";
+import CategoryModel from "@/lib/db/models/CategorySchema";
 import { NextResponse } from "next/server";
 import { Category, Expense } from "@/app/models";
-import { Prisma, PrismaClient } from "@prisma/client";
 
 export async function POST(req: Request) {
   if (!req) {
@@ -20,20 +20,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
-  await prisma.expense.createMany({
-    data: expenses.map(({ id, ...value }) => ({
-      ...value,
-      amount: BigInt(Math.floor(parseFloat(value.amount))),
-      category: value.category.id,
-    })),
-  });
+  const expensesModels = expenses.map(
+    ({ id, ...value }) =>
+      new ExpenseModel({
+        ...value,
+        amount: BigInt(Math.floor(parseFloat(value.amount))),
+        category: value.category.id,
+      })
+  );
+
+  await ExpenseModel.insertMany(expensesModels);
 
   return NextResponse.json({ status: 201 });
 }
 
 export async function GET() {
   try {
-    const expenses = await prisma.expense.findMany({});
+    const expenses = await ExpenseModel.find({});
 
     if (!expenses || expenses.length === 0) {
       return NextResponse.json({ status: "No content" }, { status: 204 });
@@ -67,11 +70,7 @@ export async function GET() {
 }
 
 async function findCategoryByName(id: string): Promise<Category> {
-  const category = await prisma.category.findFirstOrThrow({
-    where: {
-      id: id,
-    },
-  });
+  const category = await CategoryModel.findById({ id });
   return category;
 }
 
@@ -89,18 +88,17 @@ export async function PUT(req: Request, res: Response) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
-  await prisma.expense.update({
-    where: {
+  await ExpenseModel.findOneAndUpdate(
+    {
       id: data.id,
     },
-
-    data: {
+    {
       name: data.name,
       amount: Number(data.amount),
       date: data.date,
       category: data.category.id,
-    },
-  });
+    }
+  );
 
   return NextResponse.json({ status: 200 });
 }
@@ -111,15 +109,13 @@ export async function DELETE(req: Request, res: Response) {
   }
 
   const data = await req.json();
-  console.log(data)
+  console.log(data);
   if (!data.data.id) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  await prisma.expense.delete({
-    where: {
-      id: data.data.id,
-    },
+  await ExpenseModel.findOneAndDelete({
+    id: data.data.id,
   });
 
   return NextResponse.json({ status: 200 });

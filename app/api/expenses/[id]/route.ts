@@ -1,7 +1,7 @@
-import prisma from "@/lib/db/prisma";
-import { Category } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { Data, ExpenseDTOUpdate } from "../../models";
+import ExpenseModel from "@/lib/db/models/ExpenseSchema";
+import CategoryModel from "@/lib/db/models/CategorySchema";
 
 export interface Expense {
   id: string;
@@ -15,10 +15,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const expense = await prisma.expense.findFirst({
-      where: {
-        id: params.id,
-      },
+    const expense = await ExpenseModel.findById({
+      id: params.id,
     });
 
     if (!expense) {
@@ -64,17 +62,17 @@ export async function PUT(
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
   try {
-    await prisma.expense.update({
-      where: {
+    await ExpenseModel.findByIdAndUpdate(
+      {
         id: params.id,
       },
-      data: {
+      {
         name: data.name,
         amount: Number(data.amount),
         date: data.date,
         category: data.category,
-      },
-    });
+      }
+    );
 
     return NextResponse.json({ status: 204 });
   } catch (error) {
@@ -87,10 +85,8 @@ export async function PUT(
 }
 
 async function findCategoryByName(id: string): Promise<Category> {
-  const category = await prisma.category.findFirstOrThrow({
-    where: {
-      id: id,
-    },
+  const category = await CategoryModel.findById({
+    id: id,
   });
   return category;
 }

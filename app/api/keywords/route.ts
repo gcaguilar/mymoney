@@ -1,8 +1,8 @@
-import prisma from "@/lib/db/prisma";
+import KeywordModel from "@/lib/db/models/KeywordsSchema";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const data = await prisma.keywords.findMany({});
+  const data = await KeywordModel.find({});
 
   if (!data) {
     return NextResponse.json({ error: "No content" }, { status: 204 });
@@ -26,13 +26,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
-  const keywordsToCreate = data.keyword.map((item) => ({
-    name: item,
-  }));
-
-  await prisma.keywords.createMany({
-    data: keywordsToCreate,
-  });
+  const keywordModels = data.keyword.map((keyword) => new KeywordModel({ name: keyword }));
+  await KeywordModel.insertMany(keywordModels);
 
   return NextResponse.json({ status: 200 });
 }
@@ -48,16 +43,14 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 422 });
   }
 
-  const updated = await prisma.keywords.update({
-    where: {
-      id: data.id,
-    },
-    data: {
-      name: data.name,
-    },
+  const updatedKeyword = await KeywordModel.updateOne({
+    _id: data.id,
+  }, {
+    name: data.name,
   });
+  
 
-  if (updated) {
+  if (updatedKeyword) {
     return NextResponse.json({ status: 200 });
   } else {
     return NextResponse.json({ status: 204 });
