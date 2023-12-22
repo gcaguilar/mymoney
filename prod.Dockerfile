@@ -6,7 +6,7 @@ FROM base AS builder
 WORKDIR /mymoney
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY package.json yarn.lock* package-lock.json* ./
 # Omit --production flag for TypeScript devDependencies
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
@@ -26,18 +26,21 @@ COPY components.json .
 COPY lib ./lib
 COPY prisma ./prisma
 
+ARG NEXT_PUBLIC_SITE_URL
+ARG DATABASE_URL
+
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN echo $NEXT_PUBLIC_SITE_URL
+RUN echo $DATABASE_URL
+
 RUN \
   if [ -f yarn.lock ]; then yarn prisma:generate; \
   elif [ -f package-lock.json ]; then npx prisma generate; \
   elif [ -f pnpm-lock.yaml ]; then pnpm prisma generate; \
   fi
-
-# Environment variables must be present at build time
-# https://github.com/vercel/next.js/discussions/14030
-ARG ENV_VARIABLE
-ENV ENV_VARIABLE=${ENV_VARIABLE}
-ARG NEXT_PUBLIC_ENV_VARIABLE
-ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
 
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line to disable telemetry at build time
@@ -69,12 +72,6 @@ COPY --from=builder /mymoney/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /mymoney/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /mymoney/.next/static ./.next/static
-
-# Environment variables must be redefined at run time
-ARG ENV_VARIABLE
-ENV ENV_VARIABLE=${ENV_VARIABLE}
-ARG NEXT_PUBLIC_ENV_VARIABLE
-ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
 
 # Uncomment the following line to disable telemetry at run time
 ENV NEXT_TELEMETRY_DISABLED 1

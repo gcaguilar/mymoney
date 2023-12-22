@@ -21,22 +21,13 @@ COPY postcss.config.js .
 COPY components.json .
 COPY lib ./lib
 
-# Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line to disable telemetry at run time
+ARG NEXT_PUBLIC_SITE_URL
+ARG DATABASE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV DATABASE_URL=$DATABASE_URL
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Note: Don't expose ports here, Compose will handle that for us
+RUN echo $NEXT_PUBLIC_SITE_URL
+RUN echo $DATABASE_URL
 
-RUN \
-  if [ -f yarn.lock ]; then yarn prisma:generate; \
-  elif [ -f package-lock.json ]; then npx prisma generate; \
-  elif [ -f pnpm-lock.yaml ]; then pnpm prisma generate; \
-  fi
-
-# Start Next.js in development mode based on the preferred package manager
-CMD \
-  if [ -f yarn.lock ]; then yarn dev; \
-  elif [ -f package-lock.json ]; then npm run dev; \
-  elif [ -f pnpm-lock.yaml ]; then pnpm dev; \
-  else yarn dev; \
-  fi
+CMD npm run dev;
