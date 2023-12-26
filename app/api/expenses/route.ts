@@ -2,8 +2,10 @@ import ExpenseModel from "@/lib/db/models/ExpenseSchema";
 import CategoryModel from "@/lib/db/models/CategorySchema";
 import { NextResponse } from "next/server";
 import { Category, Expense } from "@/app/models";
+import dbConnect from "@/lib/db/db";
 
 export async function POST(req: Request) {
+  await dbConnect();
   if (!req) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
@@ -35,6 +37,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
+  await dbConnect();
   try {
     const expenses = await ExpenseModel.find({});
 
@@ -70,7 +73,7 @@ export async function GET() {
 }
 
 async function findCategoryByName(id: string): Promise<Category> {
-  const category = await CategoryModel.findById({ id });
+  const category = await CategoryModel.findById({ id }).exec();
   return category;
 }
 

@@ -1,3 +1,4 @@
+import dbConnect from "@/lib/db/db";
 import CategoryModel from "@/lib/db/models/CategorySchema";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -18,6 +19,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  await dbConnect();
   if (!req) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }

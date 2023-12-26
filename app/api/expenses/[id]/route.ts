@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Data, ExpenseDTOUpdate } from "../../models";
 import ExpenseModel from "@/lib/db/models/ExpenseSchema";
 import CategoryModel from "@/lib/db/models/CategorySchema";
+import dbConnect from "@/lib/db/db";
 
 export interface Expense {
   id: string;
@@ -10,6 +11,13 @@ export interface Expense {
   date: string;
   category: string;
 }
+
+interface CategoryResult {
+  id: string;
+  name: string;
+}
+
+
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
@@ -84,9 +92,10 @@ export async function PUT(
   }
 }
 
-async function findCategoryByName(id: string): Promise<Category> {
+async function findCategoryByName(id: string): Promise<CategoryResult> {
+  await dbConnect();
   const category = await CategoryModel.findById({
     id: id,
   });
-  return category;
+  return { id: category._id, name: category.name };
 }
