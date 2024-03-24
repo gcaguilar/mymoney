@@ -1,47 +1,45 @@
-FROM node:20-alpine as base
-
-FROM base AS builder
-
+FROM node:bookworm-slim as base
+RUN apt-get update && apt-get install libssl-dev ca-certificates -y
 WORKDIR /app
+
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 
 COPY package.json package-lock.json* ./
 
+FROM base as build
 RUN npm ci
 
-COPY app ./app
+COPY app ./app/
 COPY next.config.js .
 COPY tsconfig.json .
 COPY tailwind.config.ts .
 COPY postcss.config.js .
 COPY components.json .
-COPY lib ./lib
-COPY prisma ./prisma
-COPY .next ./next
-COPY public ./public
-
-ARG NEXT_PUBLIC_SITE_URL
-ARG DATABASE_URL
-
-ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ENV DATABASE_URL=$DATABASE_URL
-
-RUN npm run generateDatabase
-
+COPY lib ./lib/
+COPY .next ./next/
+COPY public ./public/
+COPY prisma ./prisma/
 RUN npm run build
 
-FROM base AS runner
+FROM base AS prod-build
 
-WORKDIR /app
+RUN npm ci --omit=dev
+COPY prisma ./prisma/
+RUN cp -R node_modules prod_node_modules
+
+FROM base AS prod
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+COPY --from=prod-build /app/prod_node_modules /app/node_modules
+RUN chown nextjs:nodejs -R /app/node_modules
+
 USER nextjs
 
-COPY --from=builder /app/public ./public
-
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./next/standalone
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./next/static
-
-ENV NEXT_TELEMETRY_DISABLED 1
+COPY --from=build /app/prisma /app/prisma
+COPY --from=build /app/.next /app/.next
+COPY --from=build /app/public /app/public
 
 CMD [ "npm", "run", "start" ]
