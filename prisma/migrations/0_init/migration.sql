@@ -5,6 +5,7 @@ CREATE TABLE "Expense" (
     "amount" DOUBLE PRECISION NOT NULL,
     "transactionDate" TEXT NOT NULL,
     "categoryId" INTEGER NOT NULL,
+    "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -16,6 +17,7 @@ CREATE TABLE "Category" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "deleted" BOOLEAN NOT NULL DEFAULT false,
+    "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -25,8 +27,8 @@ CREATE TABLE "Category" (
 -- CreateTable
 CREATE TABLE "ExpenseCategoryMapping" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
     "expenseNames" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "categoryId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
