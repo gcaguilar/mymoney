@@ -22,7 +22,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@tanstack/react-table": "^8.15.3",
-    "@types/node": "20.12.5",
+    "@types/node": "20.12.7",
     "@types/react": "^18.2.74",
     "@types/react-dom": "^18.2.24",
     "@types/type-name": "^1.0.32",
