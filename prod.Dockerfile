@@ -8,7 +8,7 @@ ENV DATABASE_URL=$DATABASE_URL
 COPY package.json package-lock.json* ./
 
 FROM base as build
-RUN npm ci
+RUN bun install
 
 COPY app ./app/
 COPY next.config.js .
@@ -20,11 +20,11 @@ COPY lib ./lib/
 COPY .next ./next/
 COPY public ./public/
 COPY prisma ./prisma/
-RUN npm run build
+RUN bun run build
 
 FROM base AS prod-build
 
-RUN npm ci --omit=dev
+RUN bun install --production
 COPY prisma ./prisma/
 RUN cp -R node_modules prod_node_modules
 
@@ -42,4 +42,4 @@ COPY --from=build /app/prisma /app/prisma
 COPY --from=build /app/.next /app/.next
 COPY --from=build /app/public /app/public
 
-CMD [ "npm", "run", "start" ]
+CMD [ "bun", "run", "start" ]
