@@ -1,6 +1,7 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import NavBar from "@/app/components/NavBar";
+import NavBar from "./components/NavBar";
+import "../app/globals.css";
+
 
 export const metadata: Metadata = {
   title: "Mi dinero",
@@ -14,9 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="h-screen w-full flex flex-col lg:flex-row">
-        <NavBar />
-        <main className="flex-1 p-5">{children}</main>
+      <body>
+        <div className="flex flex-col h-screen w-full">
+          <NavBar />
+          <main className="flex-grow p-4">{children}</main>
+          <footer className="border box-content p-4 w-full">Footer</footer>
+        </div>
       </body>
     </html>
   );

@@ -1,11 +1,11 @@
-FROM node:bookworm-slim as base
+FROM oven/bun:slim as base
 RUN apt-get update && apt-get install libssl-dev ca-certificates -y
 WORKDIR /app
 
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
-COPY package.json package-lock.json* ./
+COPY package.json bun.lockb ./
 
 FROM base as build
 RUN bun install

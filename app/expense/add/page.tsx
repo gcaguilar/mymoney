@@ -3,7 +3,9 @@
 import * as z from "zod";
 import ExpenseForm from "@/app/expense/components/ExpenseForm";
 import { formSchema } from "@/app/expense/validations";
-import { useCategories } from "@/app/hooks";
+import { Category, CategoryWithKeywords } from "@/app/types/Category";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 
 function AddExpensePage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -19,21 +21,27 @@ function AddExpensePage() {
       .then((response) => console.log(response))
       .catch((error) => console.log(error));
   }
-  const {
-    data: categories,
-    error: categoriesError,
-    isLoading: isCategoriesLoading,
-  } = useCategories()
 
-  if (categoriesError) return <div>Failed to load</div>;
-  if (isCategoriesLoading) return <div>Loading...</div>;
-  if (!categories || categories.data.length === 0) return null;
+  type Tipo = {
+    data: CategoryWithKeywords[];
+  };
+
+  const { data, error, isLoading } = useSWR<Tipo>(
+    "categories",
+    fetcher
+  );
+
+  if (isLoading) return <div>Loading</div>;
+  if (!data) return <div>Error</div>;
+  const value: Category[] = data.data.map((category) => {
+    return {
+      id: category.id,
+      name: category.name,
+    } as Category
+  });
 
   return (
-    <ExpenseForm
-      categories={categories.data}
-      onSubmit={(values) => onSubmit(values)}
-    />
+    <ExpenseForm categories={value} onSubmit={(values) => onSubmit(values)} />
   );
 }
 

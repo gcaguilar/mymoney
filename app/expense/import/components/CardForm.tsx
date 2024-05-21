@@ -1,12 +1,7 @@
 import FormDateField from "@/app/components/FormDateField";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
-import {
-  Form,
-  FormField,
-  FormItem,
-} from "@/app/components/ui/form";
-import { Category, Expense } from "@/app/models";
+import { Form, FormField, FormItem } from "@/app/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -22,12 +17,15 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import FormInputField from "@/app/components/FormInputField";
 import FormCombox from "@/app/components/FormCombox";
+import { randomInt } from "crypto";
+import { Expense } from "@/app/types/Expense";
+import { Category } from "@/app/types/Category";
 
 interface CardFormProps {
   expenses: Expense[];
   categories: Category[];
   onSubmit: (values: z.infer<typeof formListSchema>) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: number) => void;
   onUpdateItem: (expense: Expense) => void;
 }
 
@@ -41,9 +39,12 @@ const CardForm: React.FC<CardFormProps> = ({
   const values = expenses.map((expense) => ({
     [Title]: expense.name,
     [Amount]: Number(expense.amount),
-    [ExpenseDate]: new Date(expense.date),
-    [CategoryName]: expense.category.id,
-    [Id]: uuidv4(),
+    [ExpenseDate]: new Date(expense.transactionDate),
+    [CategoryName]: {
+      value: expense.category.id,
+      label: expense.category.name,
+    },
+    [Id]: Number(1),
   }));
 
   const form = useForm<z.infer<typeof formListSchema>>({
@@ -128,19 +129,12 @@ const CardForm: React.FC<CardFormProps> = ({
                         render={({ field }) => {
                           return (
                             <FormCombox
-                              onFieldChange={(id, name) => {
-                                const newData = {
-                                  ...value,
-                                  category: {
-                                    id: id,
-                                    name: name,
-                                    associatesNames: [],
-                                  },
-                                };
-                                onUpdateItem(newData);
-                              }}
                               options={sortedOptions}
-                              field={field}
+                              field={{
+                                value: field.value.value,
+                                onChange: (value: string) =>
+                                  field.onChange(value),
+                              }}
                             />
                           );
                         }}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Expense } from "../models";
+import { Expense, ExpenseWithTags } from "../types/Expense";
 
 const Id = "id";
 const Title = "title";
@@ -8,32 +8,35 @@ const ExpenseDate = "date";
 const CategoryName = "category";
 
 const formSchema = z.object({
-  [Id]: z.string(),
+  [Id]: z.number(),
   [Title]: z.string().min(2),
   [Amount]: z.coerce.number(),
   [ExpenseDate]: z.date(),
-  [CategoryName]: z.string().refine((value) => value !== ""),
+  category: z.number().nonnegative(),
 });
 
 const getDefaultValues = ({
   id,
   name,
   amount,
-  date,
+  transactionDate,
   category,
 }: Expense): Record<string, any> => {
   return {
-    [Id]: id || "",
+    [Id]: id || -1,
     [Title]: name || "",
     [Amount]: Number(amount) || 0,
-    [ExpenseDate]: date ? new Date(date) : new Date(),
-    [CategoryName]: category?.id || "",
+    [ExpenseDate]: transactionDate ? new Date(transactionDate) : new Date(),
+    [CategoryName]: {
+      id: category?.id || "",
+      name: category?.name || "",
+    },
   };
 };
 
 const formListSchema = z.object({
-  fields: z.array(formSchema)
-})
+  fields: z.array(formSchema),
+});
 
 export {
   Id,

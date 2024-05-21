@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -14,14 +13,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/app/components/ui/table"
+} from "@/app/components/ui/table";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  className?: string;
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
 export function DataTable<TData, TValue>({
+  className,
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -29,10 +30,10 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
+  });
 
   return (
-    <div className="rounded-md border">
+    <div className={className}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -47,7 +48,7 @@ export function DataTable<TData, TValue>({
                           header.getContext()
                         )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -76,5 +77,5 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

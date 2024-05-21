@@ -1,21 +1,18 @@
-import { fetcher, useCategories } from "@/app/hooks";
-import { Category, Expense } from "@/app/models";
-import { v4 as uuidv4 } from "uuid";
+import { useKeywords } from "@/app/hooks/hooks";
 import { format, parse } from "date-fns";
-import useSWR from "swr";
+import { Expense } from "@/app/types/Expense";
+import { Category, CategoryWithKeywords } from "@/app/types/Category";
 
-const useRowProcessing = () => {
-  const { data: categoryResponse } = useCategories();
-  const categoryList: Category[] = categoryResponse?.data || [];
-  const { data: useKeywords } = useSWR("keywords", fetcher);
-  const keywords = useKeywords?.data.map((item: any) => item.name) || [];
+const useRowProcessing = async () => {
+  // const categoryList: Category[] = await useCategories();
+  const categoryWithKeywords: CategoryWithKeywords[] = await useKeywords();
 
   const processRow = (row: any): Expense => {
     const expense: Expense = {
-      id: uuidv4(),
-      name: processedName(row[1]),
+      id: 1,
+      name: row[1],
       amount: processedAmount(row[3]),
-      date: processedData(row[2]),
+      transactionDate: processedData(row[2]),
       category: processedCategory(row[1]),
     };
     return expense;
@@ -29,30 +26,28 @@ const useRowProcessing = () => {
   const processedCategory = (category: string): Category => {
     const words = category.split(/\s/g);
 
-    const foundCategory = categoryList.find((cat) =>
-      words.some((word) => cat.associatesNames.includes(word))
+    const foundCategory = categoryWithKeywords.find((cat) =>
+      words.some((word) => cat.expensesNames.includes(word))
     );
 
     return (
       foundCategory || {
-        id: "",
+        id: -1,
         name: "Categoría por defecto",
-        associatesNames: [],
       }
     );
   };
 
-  const processedName = (name: string): string => {
-    const words = name.split(/\s+/);
-    const filteredWords = words.filter((word) => !keywords.includes(word));
-    return filteredWords.join(" ");
-  };
+  // const processedName = (name: string): string => {
+  //   const words = name.split(/\s+/);
+  //   const filteredWords = words.filter((word) => !categoryWithKeywords.includes(word));
+  //   return filteredWords.join(" ");
+  // };
 
   const processedAmount = (amount: string): string =>
     Math.abs(Number(amount)).toString();
-  return {
-    processRow,
-  };
+
+  return { processRow };
 };
 
 export default useRowProcessing;

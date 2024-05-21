@@ -3,10 +3,10 @@
 import { Form, FormField } from "@/app/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/app/components/ui/button";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import FormInputField from "@/app/components/FormInputField";
 import { Textarea } from "@/app/components/ui/textarea";
+import { useForm } from "react-hook-form";
 
 const formSchema = z.object({
   name: z.string().min(2),

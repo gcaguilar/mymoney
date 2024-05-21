@@ -15,14 +15,28 @@ import {
   formSchema,
   getDefaultValues,
 } from "../validations";
-import { Category, Expense } from "@/app/models";
+import { Category } from "@/app/types/Category";
+import { Expense } from "@/app/types/Expense";
+import React from "react";
+import Combobox, { ComboBoxItem } from "@/app/components/FormCombox";
 import FormCombox from "@/app/components/FormCombox";
 
 interface ExpenseFormProps {
-  expense?: Expense,
+  expense?: Expense;
   categories: Category[];
   onSubmit: (values: z.infer<typeof formSchema>) => void;
 }
+
+const transformAndSortCategories = (
+  categories: Category[]
+): ComboBoxItem[] => {
+  return categories
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((category) => ({
+      value: category.id,
+      label: category.name,
+    }));
+};
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
   expense,
@@ -32,70 +46,70 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues({
-      id: expense? expense.id : "",
+      id: expense ? expense.id : -1,
       name: expense ? expense.name : "",
       amount: expense ? expense.amount : "",
-      date: expense ? expense.date : "",
+      transactionDate: expense ? expense.transactionDate : "",
       category: {
-        id: expense ? expense.category.id : "",
+        id: expense ? expense.category.id : -1,
         name: expense ? expense.category.name : "",
-        associatesNames: []
       },
     }),
   });
 
   const sortedOptions = categories
-  .slice()
-  .sort((a, b) => a.name.localeCompare(b.name));
-
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name={Title}
-          render={({ field }) => (
-            <FormInputField
-              title="Titulo"
-              type="text"
-              field={field}
-              placeholder={form.getValues(Title)}
-            />
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={Amount}
-          render={({ field }) => (
-            <FormInputField
-              title="Cantidad"
-              type="number"
-              field={field}
-              placeholder={form.getValues(Amount).toString()}
-            />
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={ExpenseDate}
-          render={({ field }) => <FormDateField title="Fecha" field={field} />}
-        />
-        <FormField
-          control={form.control}
-          name={CategoryName}
-          render={({ field }) => {
-            return (
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name={Title}
+            render={({ field }) => (
+              <FormInputField
+                title="Titulo"
+                type="text"
+                field={field}
+                placeholder={form.getValues(Title)}
+              />
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={Amount}
+            render={({ field }) => (
+              <FormInputField
+                title="Cantidad"
+                type="number"
+                field={field}
+                placeholder={form.getValues(Amount).toString()}
+              />
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={ExpenseDate}
+            render={({ field }) => (
+              <FormDateField title="Fecha" field={field} />
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={CategoryName}
+            render={({ field }) => (
               <FormCombox
-              options={sortedOptions}
-              field={field}
-            />
-            );
-          }}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+                items={transformAndSortCategories(categories)}
+                field={field}
+              />
+            )}
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
+    </>
   );
 };
 

@@ -22,21 +22,12 @@ type DateFieldProps = {
     value: Date;
     onChange: (date: Date | undefined) => void;
   };
-  onFieldChange?: (date: Date | undefined) => void;
 };
 
 const FormDateField: React.FC<DateFieldProps> = ({
   title,
   field,
-  onFieldChange,
 }) => {
-  const handleDateSelect = (date: Date | undefined) => {
-    field.onChange(date);
-
-    if (onFieldChange) {
-      onFieldChange(date);
-    }
-  };
 
   return (
     <FormItem className="flex flex-col">
@@ -60,7 +51,7 @@ const FormDateField: React.FC<DateFieldProps> = ({
           <Calendar
             mode="single"
             selected={field.value}
-            onSelect={handleDateSelect}
+            onSelect={field.onChange}
             initialFocus
           />
         </PopoverContent>

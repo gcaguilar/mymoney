@@ -1,8 +1,9 @@
 "use client";
 
+import { Expense } from "../types/Expense";
+import { Category } from "../types/Category";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Category, Expense } from "../models";
 
 export const columns: ColumnDef<Expense>[] = [
   {
@@ -23,10 +24,10 @@ export const columns: ColumnDef<Expense>[] = [
     },
   },
   {
-    accessorKey: "date",
+    accessorKey: "transactionDate",
     header: () => <div className="text-right">Fecha del gasto</div>,
     cell: ({ row }) => {
-      const date = new Date(row.getValue("date"));
+      const date = new Date(row.getValue("transactionDate"));
       const formatted = format(date, "dd/MM/yyyy");
 
       return <div className="text-right font-medium">{formatted}</div>;

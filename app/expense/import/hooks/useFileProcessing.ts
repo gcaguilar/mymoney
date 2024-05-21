@@ -1,16 +1,16 @@
+'use client'
+
 import xlsx from "node-xlsx";
-import { parse, format } from "date-fns";
 import { useMemo, useState } from "react";
-import { Expense } from "@/app/models";
+import { Expense } from "@/app/types/Expense";
 import useRowProcessing from "./useRowProcessing";
-import exp from "constants";
 
 const PAGE_SIZE = 10;
 
-const useFileProcessing = () => {
+const useFileProcessing = async () => {
   const [processedData, setProcessedData] = useState<Expense[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { processRow } = useRowProcessing();
+  const { processRow } = await useRowProcessing();
 
   const processFiles = async (files: File[]) => {
     const processedRowList: Expense[] = [];
@@ -65,7 +65,7 @@ const useFileProcessing = () => {
     }
   };
 
-  const onRemoveItem = (id: string) => {
+  const onRemoveItem = (id: number) => {
     const newData = processedData.filter((item) => item.id !== id);
     setProcessedData(newData);
   };
@@ -82,7 +82,7 @@ const useFileProcessing = () => {
   const submitFile = () => {
     const data = { data: processedData };
     const jsonData = JSON.stringify(data);
-    fetch(`${process.env.PATH_URL_BACKEND}/expenses`, {
+    fetch(`${process.env.PATH_URL_BACKEND}expenses`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

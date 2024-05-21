@@ -15,7 +15,6 @@ type InputFieldProps = {
   };
   placeholder: string;
   type: string;
-  onFieldChange?: (value: string) => void;
 };
 
 const FormInputField: React.FC<InputFieldProps> = ({
@@ -23,15 +22,7 @@ const FormInputField: React.FC<InputFieldProps> = ({
   field,
   placeholder,
   type,
-  onFieldChange,
 }) => {
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    field.onChange(e);
-
-    if (onFieldChange) {
-      onFieldChange(e.target.value);
-    }
-  };
 
   return (
     <FormItem>
@@ -41,7 +32,7 @@ const FormInputField: React.FC<InputFieldProps> = ({
           type={type}
           placeholder={placeholder}
           value={field.value}
-          onChange={handleInputChange}
+          onChange={field.onChange}
         />
       </FormControl>
       <FormMessage />

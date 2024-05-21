@@ -1,17 +1,18 @@
-"use client";
+"use client"
 
 import { SubmitHandler, useForm } from "react-hook-form";
 import useFileProcessing from "@/app/expense/import/hooks/useFileProcessing";
-import { useCategories } from "@/app/hooks";
+import { useCategories } from "@/app/hooks/hooks";
 import FileForm from "@/app/expense/import/components/FileForm";
 import CardForm from "@/app/expense/import/components/CardForm";
 import { z } from "zod";
 import { formListSchema } from "@/app/expense/validations";
 import { Button } from "@/app/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
+import { Category } from "@/app/types/Category";
 
-const FileUploadForm = () => {
-  const { data, error, isLoading } = useCategories();
+const FileUploadForm = async () => {
+  const categories: Category[] = await useCategories();
   const {
     paginatedData,
     processFiles,
@@ -21,8 +22,8 @@ const FileUploadForm = () => {
     totalPages,
     onRemoveItem,
     onUpdateItem,
-    submitFile
-  } = useFileProcessing();
+    submitFile,
+  } = await useFileProcessing();
 
   const onSubmit: SubmitHandler<{ inputFiles: File[] }> = async (formData: {
     inputFiles: File[];
@@ -34,9 +35,7 @@ const FileUploadForm = () => {
     submitFile();
   };
 
-  if (error) return <div>Failed to load</div>;
-  if (isLoading) return <div>Loading...</div>;
-  if (!data) return null;
+  if (!categories) return <div>Error</div>;
 
   if (paginatedData.length === 0) {
     return <FileForm onSubmit={onSubmit} />;
@@ -57,7 +56,7 @@ const FileUploadForm = () => {
         <CardForm
           key={uuidv4()}
           expenses={paginatedData}
-          categories={data.data}
+          categories={categories}
           onSubmit={onSubmitForm}
           onRemove={onRemoveItem}
           onUpdateItem={onUpdateItem}
